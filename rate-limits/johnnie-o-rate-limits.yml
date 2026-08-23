@@ -1,0 +1,46 @@
+generated: '2026-08-23'
+method: probed
+source: response headers and extensions observed on live anonymous calls to both Johnnie-O
+  surfaces, plus the store's own https://checkout.johnnie-o.com/llms.txt
+note: >-
+  No numeric rate limit is published anywhere on a Johnnie-O host. What IS published is the
+  runtime signal, which is the more useful half for an agent: both surfaces return a
+  per-request cost so a caller can meter itself, and the store's llms.txt states the backoff
+  contract in prose.
+limit_count: 0
+limits: []
+runtime_signals:
+- surface: https://www.johnnie-o.com/api/2024-10/graphql.json
+  mechanism: query-cost
+  location: response body
+  field: extensions.cost.requestedQueryCost
+  observed: 'a {shop{name}} query returned requestedQueryCost 1; a nine-field shop/policy
+    query returned 9'
+  headers: []
+  note: >-
+    The Storefront API meters by calculated query cost against a leaky bucket rather than by
+    request count. The throttle state fields (extensions.cost.throttleStatus) were not
+    returned to this anonymous caller, so only the per-query cost is observable.
+- surface: https://checkout.johnnie-o.com/api/ucp/mcp
+  mechanism: complexity-score
+  location: response headers
+  headers:
+  - shopify-complexity-score
+  - shopify-complexity-score-v2
+  - x-shopify-ucp-mcp-api-version
+  - x-request-id
+  observed: 'a tools/list call returned shopify-complexity-score 29 and
+    shopify-complexity-score-v2 29'
+  note: No RateLimit-* / X-RateLimit-* / Retry-After headers were returned on any successful
+    call.
+exhaustion:
+  status_code: 429
+  documented_in: https://checkout.johnnie-o.com/llms.txt
+  quote: 'Respect rate limits. The MCP endpoint is rate-limited per IP. Back off on 429
+    responses.'
+  scope: per-IP
+  retry_after_header: not observed
+standard_headers:
+  ietf_ratelimit: false
+  x_ratelimit: false
+  retry_after: not observed

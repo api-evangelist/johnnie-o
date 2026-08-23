@@ -1,0 +1,82 @@
+generated: '2026-08-23'
+method: probed
+source: live probes of Johnnie-O's .well-known documents, GraphQL introspection and MCP
+  tools/list, 2026-08-23
+note: >-
+  Every entry below is asserted from something that was actually fetched from a Johnnie-O
+  host. Johnnie-O makes no compliance claim of its own anywhere on its site — no trust
+  center, no SOC 2 / ISO 27001 / PCI page — so no Compliance pointer is emitted. The
+  standards it does conform to are conformed to by virtue of the Shopify platform it runs on,
+  and that is stated in each evidence line rather than credited to Johnnie-O as design work.
+standards:
+- id: oauth2
+  conforms: true
+  evidence: /.well-known/oauth-authorization-server returns RFC 8414 authorization server
+    metadata with authorization_code + refresh_token grants
+- id: oidc
+  conforms: true
+  evidence: /.well-known/openid-configuration returns a complete OpenID Provider configuration
+    (issuer, jwks_uri, id_token_signing_alg_values_supported RS256)
+- id: rfc8414-authorization-server-metadata
+  conforms: true
+  evidence: HTTP 200 at https://checkout.johnnie-o.com/.well-known/oauth-authorization-server
+- id: rfc9728-protected-resource-metadata
+  conforms: true
+  evidence: HTTP 200 at https://checkout.johnnie-o.com/.well-known/oauth-protected-resource,
+    resource https://checkout.johnnie-o.com
+- id: pkce-rfc7636
+  conforms: true
+  evidence: code_challenge_methods_supported [S256] in the OIDC discovery document
+- id: graphql
+  conforms: true
+  evidence: full anonymous introspection at https://www.johnnie-o.com/api/2024-10/graphql.json
+    returned 414 types, 34 query fields, 41 mutation fields
+- id: mcp
+  conforms: true
+  evidence: JSON-RPC 2.0 tools/list at https://checkout.johnnie-o.com/api/ucp/mcp returned
+    HTTP 200 with 13 tools carrying inputSchema
+- id: json-rpc-2.0
+  conforms: true
+  evidence: MCP endpoint returns jsonrpc "2.0" envelopes including a -32001 error object
+- id: llms-txt
+  conforms: true
+  evidence: HTTP 200 at https://checkout.johnnie-o.com/llms.txt, mirrored at /agents.md
+- id: iso4217-minor-units
+  conforms: true
+  evidence: UCP tool descriptions specify prices as integers in ISO 4217 minor units paired
+    with a currency code
+- id: rfc9457-problem-details
+  conforms: false
+  evidence: no application/problem+json response observed; GraphQL uses its own errors[]
+    envelope and MCP uses JSON-RPC error objects
+- id: rfc9116-security-txt
+  conforms: false
+  evidence: /.well-known/security.txt returned 404 on all three hosts
+- id: a2a
+  conforms: false
+  evidence: /.well-known/agent-card.json and /.well-known/agent.json returned 404 on all three
+    hosts
+- id: openapi
+  conforms: false
+  evidence: no OpenAPI/Swagger document served on any host
+domain_standard:
+  id: ucp
+  name: Universal Commerce Protocol
+  version: '2026-04-08'
+  conforms: true
+  declared_in_contract: true
+  evidence: >-
+    https://checkout.johnnie-o.com/.well-known/ucp returns a UCP merchant profile declaring
+    ucp.version 2026-04-08, supported_versions 2026-04-08 and 2026-01-23, the
+    dev.ucp.shopping service over mcp transport, and the capability set
+    dev.ucp.shopping.checkout / .cart / .fulfillment / .discount with payment handlers
+    dev.shopify.shop_pay, dev.shopify.card and google_pay. The MCP endpoint echoes it in the
+    x-shopify-ucp-mcp-api-version response header.
+  spec: https://ucp.dev/2026-04-08/specification/overview/
+  market: retail commerce / agentic shopping
+  why_it_matters: >-
+    An agent that already speaks UCP can search, cart, check out and track orders at this
+    store with no bespoke connector. That is the whole point of the standard, and it is
+    declared in the contract rather than claimed on a marketing page.
+compliance_program: null
+compliance_note: Johnnie-O publishes no certifications, trust center or compliance page.

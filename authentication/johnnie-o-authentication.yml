@@ -1,0 +1,70 @@
+generated: '2026-08-23'
+method: probed
+source: https://checkout.johnnie-o.com/.well-known/openid-configuration + live calls to the
+  storefront GraphQL and UCP MCP endpoints
+note: >-
+  Three distinct auth postures coexist on Johnnie-O's surfaces, and they are not the same
+  story. The identity provider is Shopify's per-merchant customer-accounts issuer for shop
+  22750137; Johnnie-O did not author it, but it is advertised from Johnnie-O's own primary
+  domain and issues tokens for Johnnie-O's customers.
+schemes:
+- id: storefront-graphql-anonymous
+  surface: https://www.johnnie-o.com/api/2024-10/graphql.json
+  type: none
+  description: >-
+    The Hydrogen app proxies the Shopify Storefront API and injects the storefront access
+    token server-side. Anonymous POSTs succeed, including full __schema introspection. No
+    Authorization header, API key or cookie is required by the caller.
+  verified: probed
+  evidence: 'POST {shop{name}} returned HTTP 200 with data, no credentials sent'
+- id: ucp-mcp-agent-profile
+  surface: https://checkout.johnnie-o.com/api/ucp/mcp
+  type: agent-profile
+  description: >-
+    tools/list is anonymous. tools/call requires a UCP agent profile URI; without one every
+    call returns JSON-RPC error -32001 with data.code invalid_profile_url. This is agent
+    identity, not a bearer token or API key.
+  verified: probed
+  evidence: 'POST tools/call search_catalog returned -32001 "Unable to fetch agent profile:
+    Missing profile uri"'
+- id: customer-account-oidc
+  surface: https://shopify.com/authentication/22750137
+  type: openIdConnect
+  description: >-
+    OpenID Connect authorization-code flow with PKCE for Johnnie-O customer accounts.
+    Advertised from checkout.johnnie-o.com/.well-known/openid-configuration and
+    /.well-known/oauth-authorization-server (RFC 8414); the protected resource
+    checkout.johnnie-o.com advertises it via RFC 9728 oauth-protected-resource.
+  verified: probed
+  issuer: https://shopify.com/authentication/22750137
+  authorization_endpoint: https://shopify.com/authentication/22750137/oauth/authorize
+  token_endpoint: https://shopify.com/authentication/22750137/oauth/token
+  end_session_endpoint: https://shopify.com/authentication/22750137/logout
+  jwks_uri: https://shopify.com/authentication/22750137/.well-known/jwks.json
+  grant_types: [authorization_code, refresh_token, 'urn:ietf:params:oauth:grant-type:jwt-bearer']
+  response_types: [code]
+  code_challenge_methods: [S256]
+  token_endpoint_auth_methods: [client_secret_basic, client_secret_post]
+  id_token_signing_alg: [RS256]
+  claims: [iss, sub, aud, exp, iat, nonce, sid, email, email_verified]
+  subject_types: [public]
+  scopes: [openid, email, 'customer-account-api:full', 'customer-account-mcp-api:full']
+- id: storefront-customer-access-token
+  surface: https://www.johnnie-o.com/api/2024-10/graphql.json
+  type: apiKey
+  in: query-argument
+  name: customerAccessToken
+  description: >-
+    Customer-scoped Storefront reads (the customer query, address mutations, order history)
+    take a customerAccessToken minted by the customerAccessTokenCreate mutation and passed as
+    a field argument rather than a header. Anonymous callers can reach the mutation but not
+    another customer's data.
+  verified: derived
+  evidence: "graphql/johnnie-o-storefront.graphql \u2014 QueryRoot.customer(customerAccessToken: String!)"
+protected_resources:
+- resource: https://checkout.johnnie-o.com
+  authorization_servers: [https://shopify.com/authentication/22750137]
+  bearer_methods_supported: [header]
+  rfc: RFC 9728
+mtls: false
+api_keys_public: false

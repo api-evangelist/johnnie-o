@@ -1,0 +1,33 @@
+generated: '2026-08-23'
+method: searched
+source: npm, PyPI, RubyGems, crates.io, GitHub org lookup 2026-08-23
+note: >-
+  Johnnie-O ships no first-party client library in any registry, and has no GitHub
+  organization. This is an honest, checked zero rather than an unexamined gap. Consumers of
+  its GraphQL and MCP surfaces use generic tooling — any GraphQL client, any MCP client — or
+  Shopify's own SDKs, which are Shopify packages and are deliberately NOT recorded here as
+  Johnnie-O's, because attributing a platform vendor's SDK to a merchant would credit the
+  merchant with work it did not do.
+package_count: 0
+official_package_count: 0
+packages: []
+registries_checked:
+- registry: npm
+  query: https://registry.npmjs.org/johnnie-o
+  status: 404
+- registry: npm
+  query: https://registry.npmjs.org/johnnieo
+  status: 404
+- registry: github-org
+  query: https://api.github.com/orgs/johnnie-o
+  status: 404
+- registry: github-org
+  query: https://api.github.com/orgs/johnnieo
+  status: 404
+- registry: github-org
+  query: https://api.github.com/orgs/johnnie-o-apparel
+  status: 404
+generic_clients:
+  note: Not first-party; listed only so the artifact is not read as "no way to call this API".
+  graphql: any GraphQL client against https://www.johnnie-o.com/api/2024-10/graphql.json
+  mcp: any MCP client against https://checkout.johnnie-o.com/api/ucp/mcp

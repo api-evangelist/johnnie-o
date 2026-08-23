@@ -1,0 +1,25 @@
+generated: '2026-08-23'
+method: generated
+source: graphql/johnnie-o-storefront.graphql + mcp/johnnie-o-mcp-tools-list.json +
+  llms/johnnie-o-llms.txt
+note: >-
+  Two packaged skills covering the two things an agent actually does at this store: read the
+  catalog, and transact. Every operation named in the frontmatter was verified present — tool
+  names against a live tools/list response, GraphQL field names against the introspected
+  QueryRoot and Mutation types. No operation is invented. Johnnie-O publishes no skills of its
+  own; its llms.txt points agents at Shopify's cross-store skill at https://shop.app/SKILL.md,
+  which is Shopify's artifact and is deliberately not copied in here.
+skills:
+- name: johnnie-o-browse-catalog
+  file: johnnie-o-browse-catalog.md
+  api: johnnie-o:storefront-graphql
+  summary: Anonymous catalog search and product/collection reads over Storefront GraphQL, with
+    the UCP MCP catalog tools as the agent-native alternative.
+  operation_count: 12
+- name: johnnie-o-agentic-checkout
+  file: johnnie-o-agentic-checkout.md
+  api: johnnie-o:ucp-mcp
+  summary: Cart-to-order flow over UCP MCP, the buyer-approval invariant, and exactly which
+    steps can be reversed and which cannot.
+  operation_count: 11
+skill_count: 2

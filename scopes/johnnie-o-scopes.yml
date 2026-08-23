@@ -1,0 +1,26 @@
+generated: '2026-08-23'
+method: probed
+source: https://checkout.johnnie-o.com/.well-known/openid-configuration
+note: >-
+  Read verbatim from the scopes_supported array of the OIDC discovery document served on
+  Johnnie-O's own primary domain. This is Shopify's customer-accounts scope set for merchant
+  tenant 22750137 — Johnnie-O publishes no scope reference page of its own, and no additional
+  scopes were found anywhere on its site. Recorded exactly as advertised; nothing inferred.
+flow: authorization_code
+pkce: S256
+issuer: https://shopify.com/authentication/22750137
+scopes:
+- name: openid
+  description: Standard OpenID Connect scope — requests an ID token identifying the customer.
+- name: email
+  description: Releases the customer's email and email_verified claims.
+- name: customer-account-api:full
+  description: Full access to the Shopify Customer Account API for the signed-in customer of
+    this store — orders, addresses, profile.
+- name: customer-account-mcp-api:full
+  description: Full access to the Customer Account MCP API for the signed-in customer, the
+    agent-facing projection of the same customer data.
+scope_count: 4
+docs: null
+docs_note: Johnnie-O publishes no OAuth scope reference; the discovery document is the only
+  published source.

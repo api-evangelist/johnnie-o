@@ -1,0 +1,131 @@
+generated: '2026-08-23'
+method: derived
+source: mcp/johnnie-o-mcp-tools-list.json + graphql/johnnie-o-storefront.graphql
+note: >-
+  Johnnie-O publishes NO OpenAPI. The two machine-readable contracts it serves are a GraphQL
+  schema (Shopify Storefront API, anonymously introspectable at
+  https://www.johnnie-o.com/api/2024-10/graphql.json) and an MCP tool surface (UCP shopping
+  service at https://checkout.johnnie-o.com/api/ucp/mcp). This crosswalk therefore binds MCP
+  tools to GraphQL root fields rather than to REST operationIds. Both sides were read live —
+  every tool name below came from a 200 tools/list response and every GraphQL field below was
+  verified present in the introspected QueryRoot/Mutation. The bindings are semantic, not
+  declared by the provider, so confidence is recorded honestly per row: the UCP checkout model
+  and the Storefront cart model are related but not isomorphic.
+surfaces:
+  openapi: null
+  openapi_note: No OpenAPI or Swagger document is served on any Johnnie-O host (probed 2026-08-23).
+  graphql:
+    endpoint: https://www.johnnie-o.com/api/2024-10/graphql.json
+    introspection: open
+    gated: false
+    types: 414
+    query_fields: 34
+    mutation_fields: 41
+  mcp:
+    endpoint: https://checkout.johnnie-o.com/api/ucp/mcp
+    tools_list: open
+    tools_call: gated
+    tools_call_note: >-
+      tools/call returns JSON-RPC -32001 invalid_profile_url without a UCP agent profile URI.
+crosswalk:
+- tool: get_cart
+  category: cart
+  graphql: [cart]
+  binding: graphql
+  confidence: high
+- tool: create_cart
+  category: cart
+  graphql: [cartCreate]
+  binding: graphql
+  confidence: high
+- tool: update_cart
+  category: cart
+  graphql: [cartLinesAdd, cartLinesUpdate, cartLinesRemove, cartAttributesUpdate, cartNoteUpdate,
+    cartDiscountCodesUpdate, cartBuyerIdentityUpdate, cartGiftCardCodesAdd, cartGiftCardCodesRemove]
+  binding: graphql
+  confidence: medium
+  note: One UCP tool fans out across nine Storefront mutations; the tool takes a whole cart
+    patch where GraphQL takes one mutation per concern.
+- tool: search_catalog
+  category: catalog
+  graphql: [search, predictiveSearch, products]
+  binding: graphql
+  confidence: high
+- tool: lookup_catalog
+  category: catalog
+  graphql: [nodes, products, productByHandle]
+  binding: graphql
+  confidence: medium
+  note: Lookup by identifier maps to nodes() for gids and to products(query:) / productByHandle
+    for handles.
+- tool: get_product
+  category: catalog
+  graphql: [product, productByHandle]
+  binding: graphql
+  confidence: high
+- tool: complete_checkout
+  category: checkout
+  graphql: [cartSubmitForCompletion]
+  binding: graphql
+  confidence: medium
+  note: Both terminate a cart into an order, but UCP complete_checkout also carries the payment
+    handler result while cartSubmitForCompletion delegates to Shopify's completion attempt.
+- tool: update_checkout
+  category: checkout
+  graphql: [cartDeliveryAddressesUpdate, cartSelectedDeliveryOptionsUpdate, cartBuyerIdentityUpdate,
+    cartBillingAddressUpdate, cartPaymentUpdate]
+  binding: graphql
+  confidence: medium
+  note: Shipping address and method selection live on the cart in GraphQL and on the checkout
+    in UCP.
+- tool: get_order
+  category: order
+  graphql: [customer]
+  binding: graphql
+  confidence: low
+  note: The Storefront schema only reaches Order through customer.orders, which requires a
+    customer access token; the UCP tool reads an order by id. Not an equivalent access path.
+mcp_only:
+- tool: get_checkout
+  reason: The 2024-10 Storefront schema has no checkout query — checkout was replaced by Cart.
+    UCP reintroduces a first-class checkout object with no GraphQL counterpart.
+- tool: create_checkout
+  reason: No Storefront mutation creates a checkout object; cartPrepareForCompletion is the
+    nearest concept and returns a cart, not a checkout.
+- tool: cancel_checkout
+  reason: No Storefront mutation cancels a checkout. This is the only agent-reachable reversal
+    for an in-flight checkout.
+- tool: cancel_cart
+  reason: No Storefront mutation cancels a cart; the GraphQL model expects the cart to be
+    abandoned rather than explicitly cancelled.
+graphql_only:
+- fields: [article, articles, blog, blogByHandle, blogs, page, pageByHandle, pages]
+  capability: Editorial content — blog articles and static pages. No UCP tool reads content.
+- fields: [menu, metaobject, metaobjects, sitemap, urlRedirects]
+  capability: Navigation, custom content models and URL routing.
+- fields: [collection, collectionByHandle, collections, productRecommendations, productTags,
+    productTypes]
+  capability: Merchandising — collections, recommendations and facet vocabularies. UCP exposes
+    search and lookup but no collection browse.
+- fields: [localization, locations, paymentSettings, shop]
+  capability: Store metadata, markets/currencies, retail locations and payment configuration.
+- fields: [customer, customerAccessTokenCreate, customerAccessTokenCreateWithMultipass, customerAccessTokenDelete,
+    customerAccessTokenRenew, customerActivate, customerActivateByUrl, customerAddressCreate,
+    customerAddressDelete, customerAddressUpdate, customerCreate, customerDefaultAddressUpdate,
+    customerRecover, customerReset, customerResetByUrl, customerUpdate]
+  capability: Customer accounts and address book — 16 fields with no UCP tool equivalent.
+- fields: [shopPayPaymentRequestSessionCreate, shopPayPaymentRequestSessionSubmit, cartClone,
+    cartMetafieldsSet, cartMetafieldDelete, cartRemovePersonalData, cartPrepareForCompletion,
+    cartCompletionAttempt, publicApiVersions, node]
+  capability: Shop Pay sessions, cart metafields, privacy erasure, completion polling and
+    schema/version plumbing.
+coverage:
+  mcp_tools_total: 13
+  mcp_tools_bound_to_graphql: 9
+  mcp_only: 4
+  graphql_root_fields_total: 75
+  graphql_query_fields: 34
+  graphql_mutation_fields: 41
+  graphql_fields_with_a_tool: 20
+  graphql_only_fields: 55
+  rest_operations_total: 0

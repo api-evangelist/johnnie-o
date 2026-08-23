@@ -1,0 +1,17 @@
+generated: '2026-08-23'
+method: searched
+source: https://www.johnnie-o.com/ and https://checkout.johnnie-o.com/llms.txt
+note: >-
+  Johnnie-O is a men's, women's and boys' apparel brand. It sells physical goods, not API
+  access, and it publishes no developer plans, API tiers, quotas or metered pricing of any
+  kind. Its agent-facing surfaces (the Storefront GraphQL proxy and the UCP MCP endpoint) are
+  free to call anonymously and exist to sell merchandise, so there is nothing to price. This
+  is an honest zero, not a gap: recorded so the absence is countable rather than looking
+  unchecked.
+plan_count: 0
+plans: []
+free_tier: true
+free_tier_note: Both machine surfaces answer anonymous callers at no cost; there is no signup,
+  key issuance or billing relationship for API access.
+commercial_model: retail-merchandise
+consumer_pricing_page: https://www.johnnie-o.com/

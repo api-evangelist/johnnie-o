@@ -1,0 +1,85 @@
+generated: '2026-08-23'
+method: probed
+source: live error responses observed on both Johnnie-O surfaces 2026-08-23 +
+  graphql/johnnie-o-storefront.graphql enum definitions
+format: graphql-errors + json-rpc-2.0
+rfc9457: false
+note: >-
+  Johnnie-O publishes no error reference page. The catalogue below is split between errors
+  actually observed on a live call (marked observed: true) and error CODE VOCABULARIES read
+  verbatim out of the introspected GraphQL schema's enum types — those are declared by the
+  contract even though this pass did not trigger each one. Nothing is invented; no
+  remediation text is attributed to the provider that the provider did not write.
+envelopes:
+- surface: storefront-graphql
+  http_status: 200
+  shape: 'errors[]: {message, locations[], path[], extensions{code, typeName, fieldName}}'
+  note: HTTP status is always 200 on a well-formed POST; the error channel is the body.
+- surface: storefront-graphql-mutations
+  http_status: 200
+  shape: '<mutation>.userErrors[] / cartUserErrors[]: {field[], message, code}'
+  note: Business-rule failures ride the payload, not errors[]. An agent that only checks
+    errors[] will read a failed write as a success.
+- surface: ucp-mcp
+  http_status: 200
+  shape: 'error: {code, message, data{code, content, continue_url}}'
+  note: JSON-RPC 2.0 error object.
+problems:
+- id: undefinedField
+  surface: storefront-graphql
+  observed: true
+  http_status: 200
+  extensions_code: undefinedField
+  title: Field does not exist on type
+  example_message: "Field 'bogusField' doesn't exist on type 'QueryRoot'"
+  evidence: 'POST {bogusField} to https://www.johnnie-o.com/api/2024-10/graphql.json'
+- id: invalid_profile_url
+  surface: ucp-mcp
+  observed: true
+  http_status: 200
+  jsonrpc_code: -32001
+  data_code: invalid_profile_url
+  title: UCP discovery failed
+  example_message: 'Unable to fetch agent profile: Missing profile uri'
+  remediation: >-
+    Present a UCP agent profile URI. Returned for every tools/call attempted without one, and
+    also returned for an unknown JSON-RPC method, so it is not a reliable discriminator
+    between "bad method" and "no agent identity".
+  evidence: 'POST tools/call and POST nope/list to https://checkout.johnnie-o.com/api/ucp/mcp'
+- id: no-query-string
+  surface: storefront-graphql
+  observed: true
+  http_status: 200
+  title: No query string was present
+  evidence: GET https://www.johnnie-o.com/api/2024-10/graphql.json
+declared_error_vocabularies:
+  note: Read verbatim from enum types in the introspected schema. These are the codes the
+    contract says a caller may receive; this pass did not trigger each one.
+  enums:
+  - name: CartErrorCode
+    surface: cart mutations
+    field: cartUserErrors[].code
+  - name: CheckoutErrorCode
+    surface: checkout
+    field: checkoutUserErrors[].code
+  - name: CustomerErrorCode
+    surface: customer mutations
+    field: customerUserErrors[].code
+  - name: SubmissionErrorCode
+    surface: cartSubmitForCompletion
+    field: SubmitFailed.errors[].code
+  - name: CartSubmitForCompletionResult
+    surface: cartSubmitForCompletion
+    field: result union — SubmitSuccess / SubmitThrottled / SubmitFailed / SubmitAlreadyAccepted
+  - name: CompletionErrorCode
+    surface: cartCompletionAttempt
+    field: CompletionError.code
+  - name: MetafieldDeleteErrorCode
+    surface: cartMetafieldDelete
+  - name: MetafieldsSetUserErrorCode
+    surface: cartMetafieldsSet
+throttling:
+  code: SubmitThrottled
+  note: cartSubmitForCompletion can return a SubmitThrottled result with a pollAfter
+    timestamp; that is the closest thing to a Retry-After this surface publishes.
+  see: rate-limits/johnnie-o-rate-limits.yml

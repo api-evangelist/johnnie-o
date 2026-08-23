@@ -1,23 +1,186 @@
 aid: johnnie-o
 name: Johnnie-O
-description: 'Johnnie-O is a company surfaced via the API Evangelist harvest backlog (source: secondary-market)
-  and added to the network as a stub for full-pipeline profiling.'
+description: >-
+  Johnnie-O is a Los Angeles based men's, women's and boys' apparel brand founded in 2005 by
+  John O'Donnell, blending East Coast prep with West Coast casual across polos, performance
+  golf shirts, outerwear, shorts and collegiate Game Day licensed product, sold direct through
+  johnnie-o.com, its own retail stores, wholesale and green-grass golf accounts. It is an
+  apparel company, not a software vendor, and it operates no developer program, publishes no
+  API documentation, ships no SDK and has no GitHub organization. It does, however, expose two
+  real anonymous machine-readable surfaces through the Shopify Hydrogen storefront it runs: an
+  introspectable Storefront GraphQL endpoint on its own domain, and a live Universal Commerce
+  Protocol (UCP) MCP endpoint on its Shopify-served primary domain that publishes thirteen
+  agent tools for catalog search, cart, checkout and order lookup. The store also serves its
+  own llms.txt and agents.md agent instructions. Those surfaces are Shopify platform
+  infrastructure running under Johnnie-O's tenant and on hosts Johnnie-O controls; they are
+  profiled here as Johnnie-O's agent surface, not as Johnnie-O-authored API design.
+image: https://johnnie-o-prod.s3.us-west-2.amazonaws.com/media/_190x190_crop_center-center_none/logo-200x200.png
 url: https://raw.githubusercontent.com/api-evangelist/johnnie-o/refs/heads/main/apis.yml
 x-type: company
 x-source: harvest:secondary-market
 x-tier: stub
 x-tier-reason: harvest
-specificationVersion: '0.20'
+specificationVersion: '0.23'
 created: '2026-08-23'
 modified: '2026-08-23'
 tags:
 - Company
-apis: []
+- Apparel
+- Retail
+- E-Commerce
+- Direct to Consumer
+- Golf
+- Fashion
+- Consumer Goods
+- Shopify
+- Agentic Commerce
+tags_raw:
+- Company
+- Apparel
+- Retail
+- E-Commerce
+- Direct To Consumer
+- Golf
+- Fashion
+- Consumer Goods
+- Shopify
+- Agentic Commerce
+apis:
+- aid: johnnie-o:storefront-graphql
+  name: Johnnie-O Storefront GraphQL API
+  description: >-
+    Anonymous, fully introspectable GraphQL endpoint served from Johnnie-O's own Hydrogen
+    storefront host. This is the Shopify Storefront API for merchant tenant 22750137; the
+    Hydrogen app proxies the request and injects the storefront access token server-side, so
+    callers need no credentials. Full introspection returned 414 types, 34 query fields and 41
+    mutation fields covering products, variants, collections, carts, customers, blogs, pages,
+    metaobjects, localization and Shop Pay sessions. The schema is Shopify's, not Johnnie-O's
+    design work, but it is served on a Johnnie-O host and returns Johnnie-O's own commerce
+    data.
+  humanURL: https://www.johnnie-o.com/
+  baseURL: https://www.johnnie-o.com/api/2024-10/graphql.json
+  tags:
+  - GraphQL
+  - Products
+  - Collections
+  - Cart
+  - Checkout
+  - Customers
+  - Commerce
+  tags_raw:
+  - GraphQL
+  - Products
+  - Collections
+  - Cart
+  - Checkout
+  - Customers
+  - Commerce
+  properties:
+  - type: GraphQL
+    url: graphql/johnnie-o-storefront.graphql
+  - type: DataModel
+    url: data-model/johnnie-o-data-model.yml
+  - type: Conventions
+    url: conventions/johnnie-o-conventions.yml
+  - type: ErrorCatalog
+    url: errors/johnnie-o-problem-types.yml
+  - type: Website
+    url: https://www.johnnie-o.com/
+- aid: johnnie-o:ucp-mcp
+  name: Johnnie-O UCP Commerce MCP Endpoint
+  description: >-
+    Live remote MCP server implementing the Universal Commerce Protocol shopping service
+    (version 2026-04-08) on Johnnie-O's Shopify-served primary domain. An anonymous JSON-RPC
+    tools/list returns thirteen tools with complete input schemas — search_catalog,
+    lookup_catalog, get_product, create_cart, get_cart, update_cart, cancel_cart,
+    create_checkout, get_checkout, update_checkout, complete_checkout, cancel_checkout and
+    get_order. Tool invocation is gated on a UCP agent profile URI. Capabilities declared at
+    /.well-known/ucp cover checkout, cart, fulfillment and discount, with Shop Pay, card and
+    Google Pay payment handlers. The store's own llms.txt requires explicit buyer approval
+    before any agent completes payment.
+  humanURL: https://checkout.johnnie-o.com/llms.txt
+  baseURL: https://checkout.johnnie-o.com/api/ucp/mcp
+  tags:
+  - MCP
+  - Agentic Commerce
+  - UCP
+  - Cart
+  - Checkout
+  - Catalog
+  - Orders
+  tags_raw:
+  - MCP
+  - Agentic Commerce
+  - UCP
+  - Cart
+  - Checkout
+  - Catalog
+  - Orders
+  properties:
+  - type: MCPServer
+    url: mcp/johnnie-o-mcp.yml
+  - type: ToolCrosswalk
+    url: mcp/johnnie-o-tool-crosswalk.yml
+  - type: Documentation
+    url: https://checkout.johnnie-o.com/llms.txt
+  - type: Website
+    url: https://www.johnnie-o.com/
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: DomainSecurity
+  url: security/johnnie-o-domain-security.yml
 - type: Website
-  url: https://forgeglobal.com/johnnie-o_stock/
+  url: https://www.johnnie-o.com/
+- type: GraphQL
+  url: graphql/johnnie-o-storefront.graphql
+- type: MCPServer
+  url: mcp/johnnie-o-mcp.yml
+- type: ToolCrosswalk
+  url: mcp/johnnie-o-tool-crosswalk.yml
+- type: LLMsTxt
+  url: llms/johnnie-o-llms.txt
+- type: AgentSkill
+  url: skills/_index.yml
+- type: WellKnown
+  url: well-known/johnnie-o-well-known.yml
+- type: Authentication
+  url: authentication/johnnie-o-authentication.yml
+- type: OAuthScopes
+  url: scopes/johnnie-o-scopes.yml
+- type: Conformance
+  url: conformance/johnnie-o-conformance.yml
+- type: Conventions
+  url: conventions/johnnie-o-conventions.yml
+- type: Lifecycle
+  url: lifecycle/johnnie-o-lifecycle.yml
+- type: ErrorCatalog
+  url: errors/johnnie-o-problem-types.yml
+- type: DataModel
+  url: data-model/johnnie-o-data-model.yml
+- type: RateLimits
+  url: rate-limits/johnnie-o-rate-limits.yml
+- type: Plans
+  url: plans/johnnie-o-plans-pricing.yml
+- type: Packages
+  url: packages/johnnie-o-packages.yml
+- type: Documentation
+  url: https://checkout.johnnie-o.com/llms.txt
+- type: Support
+  url: https://www.johnnie-o.com/contact-us
+- type: HelpCenter
+  url: https://www.johnnie-o.com/pages/faqs-new-icon
+- type: TermsOfService
+  url: https://www.johnnie-o.com/pages/terms-conditions
+- type: PrivacyPolicy
+  url: https://www.johnnie-o.com/pages/privacy
+- type: SignUp
+  url: https://www.johnnie-o.com/account/login
+x-enrichment:
+  date: '2026-08-23'
+  status: enriched
+  artifacts_added: 24
+  pass: local-v1

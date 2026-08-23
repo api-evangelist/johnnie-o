@@ -1,0 +1,151 @@
+generated: '2026-08-23'
+method: derived
+source: graphql/johnnie-o-storefront.graphql + mcp/johnnie-o-mcp-tools-list.json +
+  llms/johnnie-o-llms.txt + live probes 2026-08-23
+note: >-
+  Cross-cutting runtime semantics for the two machine surfaces Johnnie-O serves. Everything
+  here was read out of a contract or observed on a live response; where a convention is
+  absent it is recorded as absent rather than filled in from what the platform does
+  elsewhere.
+auth_style: >-
+  Anonymous for storefront GraphQL reads and for MCP tools/list. Agent-profile identity (UCP)
+  for MCP tools/call. OIDC authorization-code + PKCE for customer-scoped access. See
+  authentication/johnnie-o-authentication.yml.
+idempotency:
+  supported: false
+  header: null
+  scope: null
+  retention: null
+  evidence: >-
+    No Idempotency-Key header is accepted or documented on either surface, and no idempotency
+    argument appears anywhere in the 41 Storefront mutations or the 13 UCP tool input schemas.
+  mitigation: >-
+    The cart and checkout model is id-addressed rather than command-addressed — create_cart /
+    cartCreate mints an id and every subsequent write targets that id — so a retried update is
+    naturally convergent. A retried create_cart or cartCreate, however, will mint a second
+    cart. That is the real exposure and there is no published guard against it.
+  grade: absent
+pagination:
+  style: cursor
+  spec: GraphQL Cursor Connections
+  request_params: [first, last, after, before, reverse, sortKey]
+  response_fields: [edges, node, cursor, pageInfo.hasNextPage, pageInfo.hasPreviousPage,
+    pageInfo.startCursor, pageInfo.endCursor]
+  evidence: graphql/johnnie-o-storefront.graphql — every *Connection type carries edges/nodes
+    and a PageInfo
+  mcp_note: The UCP catalog tools take their own cursor in the catalog argument rather than
+    the GraphQL connection arguments.
+field_selection:
+  style: graphql-native
+  note: GraphQL selection sets are the sparse-fieldset mechanism; there is no expand= or
+    fields= parameter because the query names exactly what it wants.
+metadata:
+  supported: true
+  mechanism: metafields and metaobjects
+  fields: [metafield, metafields, metaobject, metaobjects, cartMetafieldsSet,
+    cartMetafieldDelete]
+  note: Custom key/value data is namespaced (namespace + key) and typed.
+request_id_tracing:
+  supported: true
+  header: x-request-id
+  observed_on: [https://www.johnnie-o.com/, 'https://checkout.johnnie-o.com/api/ucp/mcp']
+  example_shape: 'd23de5ce-b8c1-4dd3-acc4-c27ab4ce779a-1787501755'
+  note: A second trace header, server-timing, carries requestID, edge, country and the
+    graphql operation name on storefront responses.
+versioning:
+  style: calendar-quarter in the URI path
+  see: lifecycle/johnnie-o-lifecycle.yml
+error_envelope:
+  graphql:
+    shape: 'errors[] with message, locations[], path[], extensions.code'
+    example: '{"errors":[{"message":"Field ''bogusField'' doesn''t exist on type ''QueryRoot''","locations":[{"line":1,"column":3}],"path":["query","bogusField"],"extensions":{"code":"undefinedField","typeName":"QueryRoot","fieldName":"bogusField"}}]}'
+    http_status_on_error: 200
+    note: GraphQL errors are returned with HTTP 200; status codes are not the error channel.
+  mcp:
+    shape: 'JSON-RPC 2.0 error object with code, message and a data envelope carrying code,
+      content and continue_url'
+    example: '{"jsonrpc":"2.0","id":1,"error":{"code":-32001,"message":"UCP discovery failed","data":{"code":"invalid_profile_url","content":"Unable to fetch agent profile: Missing profile uri","continue_url":"https://johnnie-oadmin.myshopify.com/"}}}'
+    http_status_on_error: 200
+  mutation_user_errors:
+    shape: 'Every Storefront mutation payload carries a userErrors[] (or cartUserErrors[])
+      array of {field, message, code} for business-rule failures, separate from transport
+      errors.'
+    note: This is the layer an agent must actually read — a mutation can succeed at HTTP and
+      GraphQL level and still have failed.
+  rfc9457: false
+rate_limit_signaling:
+  see: rate-limits/johnnie-o-rate-limits.yml
+  summary: query cost in extensions.cost (GraphQL); shopify-complexity-score headers (MCP);
+    429 with per-IP backoff documented in llms.txt.
+dry_run_mode:
+  supported: false
+  grade: absent
+  note: >-
+    No preview, simulate or dry-run flag exists on any write. The nearest rehearsal is
+    cartPrepareForCompletion, which validates a cart for completion without submitting it,
+    and create_checkout, which prices and validates without completing. Neither is documented
+    as a dry run.
+reversibility:
+  grade: documented
+  applicable: true
+  summary: >-
+    Every agent-reachable write on this store is reversible BEFORE payment and the reversal
+    operations are first-class named tools. After payment, the reversal is a human refund
+    process with a published window, but there is no API operation for it — an agent can
+    undo a purchase it has not yet completed and cannot undo one it has.
+  write_surfaces:
+  - surface: cart
+    write_operations: [create_cart, update_cart, cartCreate, cartLinesAdd, cartLinesUpdate,
+      cartLinesRemove, cartNoteUpdate, cartAttributesUpdate, cartDiscountCodesUpdate]
+    reversal_operation: cancel_cart
+    reversal_kind: cancel
+    window: before completion
+    window_stated: true
+    window_source: mcp/johnnie-o-mcp-tools-list.json — cancel_cart "Cancels a cart."
+    note: >-
+      Line-level writes are also reversible in place via cartLinesRemove / cartLinesUpdate,
+      and cartRemovePersonalData erases buyer PII from a cart.
+    confidence: high
+  - surface: checkout
+    write_operations: [create_checkout, update_checkout, complete_checkout]
+    reversal_operation: cancel_checkout
+    reversal_kind: cancel
+    window: before complete_checkout is called
+    window_stated: true
+    window_source: mcp/johnnie-o-mcp-tools-list.json — cancel_checkout "Cancels a checkout."
+    note: >-
+      cancel_checkout reverses an in-flight checkout. Once complete_checkout returns an order
+      id there is no cancel or refund tool in the surface — the reversal leaves the API.
+    confidence: high
+  - surface: order
+    write_operations: []
+    reversal_operation: null
+    reversal_kind: refund
+    window: null
+    window_stated: false
+    window_source: null
+    note: >-
+      There is NO order-cancel, refund, void or return operation in either the 13 UCP tools or
+      the 41 Storefront mutations. The refund path is a human one governed by
+      https://checkout.johnnie-o.com/policies/refund-policy (HTTP 200), and this pipeline
+      deliberately does not restate a day-count from that page as an API window — no window is
+      asserted that the machine contract does not state.
+    confidence: high
+  - surface: customer
+    write_operations: [customerCreate, customerUpdate, customerAddressCreate,
+      customerAddressUpdate, customerDefaultAddressUpdate]
+    reversal_operation: customerAddressDelete
+    reversal_kind: delete
+    window: unbounded
+    window_stated: false
+    note: Address creation is reversible by delete; a customer record itself has no delete
+      mutation on the Storefront surface.
+    confidence: medium
+  buyer_approval_invariant: >-
+    The store's own llms.txt states that agents must not complete payment without explicit,
+    contemporaneous buyer consent. That approval gate is the practical reversibility control
+    on the one operation that cannot be undone through the API.
+  grade_rationale: >-
+    documented, not verified: cancel_cart and cancel_checkout are named reversal operations
+    with a clearly stated "before completion" boundary, but no duration window is published
+    for any reversal, and the post-order path has no API reversal at all.

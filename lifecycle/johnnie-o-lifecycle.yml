@@ -1,0 +1,66 @@
+generated: '2026-08-23'
+method: probed
+source: publicApiVersions query against https://www.johnnie-o.com/api/2024-10/graphql.json +
+  /.well-known/ucp + live version-path probes, 2026-08-23
+note: >-
+  Johnnie-O publishes no versioning policy, deprecation policy, SLA or status page of its own.
+  Everything recorded here was read out of the contracts it serves. Both surfaces are
+  calendar-versioned by the Shopify platform, and the schema is self-describing about it: the
+  Storefront API exposes publicApiVersions as a root field, so an agent can ask the API which
+  versions it will still answer on.
+versioning:
+  scheme: calendar-quarter-in-uri-path
+  storefront_graphql:
+    pattern: /api/{YYYY-MM}/graphql.json
+    pinned_by_storefront: '2024-10'
+    pinned_by_storefront_note: >-
+      The Hydrogen app's own client calls /api/2024-10/graphql.json, which is four quarters
+      behind the latest supported release the same API reports.
+    latest: '2026-07'
+    supported:
+    - '2025-10'
+    - '2026-01'
+    - '2026-04'
+    - '2026-07'
+    release_candidate: '2026-10'
+    unstable: unstable
+    discovery_field: publicApiVersions
+    note: >-
+      Version paths older than the supported window still answered HTTP 200 with data when
+      probed (2023-01 through 2025-07 all returned shop.name), so the merchant host is more
+      permissive than the advertised support window.
+  ucp:
+    current: '2026-04-08'
+    supported:
+    - '2026-04-08'
+    - '2026-01-23'
+    response_header: x-shopify-ucp-mcp-api-version
+    discovery: https://checkout.johnnie-o.com/.well-known/ucp
+deprecation:
+  policy_url: null
+  sunset_header: false
+  deprecation_header: false
+  in_contract: true
+  in_contract_note: >-
+    The GraphQL schema carries @deprecated directives on 52 fields with human-readable
+    reasons, which is the only deprecation signal published on any Johnnie-O surface.
+  deprecated_field_count: 52
+  deprecated_examples:
+  - Article.author
+  - Cart.estimatedCost
+  - Cart.discountAllocations
+  - CartCost.totalTaxAmount
+  - CartCost.totalDutyAmount
+  - AppliedGiftCard.balanceV2
+  - BaseCartLine.estimatedCost
+sla:
+  url: null
+  uptime_target: null
+status_page: null
+status_page_note: No status page is published for Johnnie-O; the underlying platform status
+  page (shopifystatus.com) belongs to Shopify, not to this merchant, and is deliberately not
+  wired as a Johnnie-O StatusPage pointer.
+changelog: null
+changelog_note: Johnnie-O publishes no API changelog. shopify.dev/changelog covers the
+  platform, not this merchant's surface.
+deprecated_operations: []
