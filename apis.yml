@@ -14,6 +14,17 @@ description: >-
   own llms.txt and agents.md agent instructions. Those surfaces are Shopify platform
   infrastructure running under Johnnie-O's tenant and on hosts Johnnie-O controls; they are
   profiled here as Johnnie-O's agent surface, not as Johnnie-O-authored API design.
+deliveryModel:
+  model: saas
+  open_source: false
+  commercial: true
+  callable_host: false
+  label: Hosted service · you call their endpoint
+  confidence: medium
+  source:
+  - pricing
+  generated: '2026-08-28'
+  method: derived
 image: https://johnnie-o-prod.s3.us-west-2.amazonaws.com/media/_190x190_crop_center-center_none/logo-200x200.png
 url: https://raw.githubusercontent.com/api-evangelist/johnnie-o/refs/heads/main/apis.yml
 x-type: company
