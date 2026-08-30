@@ -72,8 +72,8 @@ apis:
   baseURL: https://www.johnnie-o.com/api/2024-10/graphql.json
   tags:
   - GraphQL
-  - Products
-  - Collections
+  - Product
+  - Collection
   - Cart
   - Checkout
   - Customers
@@ -118,7 +118,7 @@ apis:
   - Cart
   - Checkout
   - Catalog
-  - Orders
+  - Order
   tags_raw:
   - MCP
   - Agentic Commerce
