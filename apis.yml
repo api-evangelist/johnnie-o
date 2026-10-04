@@ -112,6 +112,9 @@ apis:
     url: errors/johnnie-o-problem-types.yml
   - type: Website
     url: https://www.johnnie-o.com/
+  x-surface: platform-generated
+  x-platform: shopify
+  x-platform-surface: storefront-graphql
 - aid: johnnie-o:ucp-mcp
   name: Johnnie-O UCP Commerce MCP Endpoint
   description: >-
@@ -151,6 +154,9 @@ apis:
     url: https://checkout.johnnie-o.com/llms.txt
   - type: Website
     url: https://www.johnnie-o.com/
+  x-surface: platform-generated
+  x-platform: shopify
+  x-platform-surface: ucp
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
