@@ -1,0 +1,16 @@
+generated: '2026-10-12'
+method: none
+source:
+- https://zapier.com/apps/johnnie-o/integrations
+- https://n8n.io/integrations/johnnie-o/
+- https://composio.dev/toolkits/johnnie-o
+- https://monid.ai/tools/johnnie-o
+checked:
+- https://composio.dev/toolkits/johnnie-o
+- https://monid.ai/tools/johnnie-o
+- https://n8n.io/integrations/johnnie-o/
+- https://zapier.com/apps/johnnie-o/integrations
+summary: null
+marketplace_apps: []
+edges: []
+templates: []
